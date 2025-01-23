@@ -9,6 +9,11 @@
   margin-bottom: 20px;
 }
 
+.header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
 .tasks-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(4, 1fr));

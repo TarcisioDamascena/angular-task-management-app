@@ -1,6 +1,9 @@
 <div>
     <mat-toolbar color="primary">
-        <span>Task management</span>
+        <div class="logo-container">
+            <img src="Logo.png" alt="Logo task managemente" width="100" height="100">
+            <span>To-Do App</span>
+        </div>
         <span class="spacer"></span>
         <ng-container *ngIf="authService.isAuthenticated$ | async">
             <button mat-button (click)="logout()">Logout</button>
