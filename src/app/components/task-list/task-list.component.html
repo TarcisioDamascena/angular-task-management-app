@@ -1,0 +1,36 @@
+<div class="task-list-container">
+  <div class="header">
+    <h1>My Tasks</h1>
+    <button mat-raised-button color="primary" (click)="openTaskModal()">
+      <mat-icon>add</mat-icon>
+      Create Task
+    </button>
+  </div>
+
+  <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" class="loading-spinner" />
+
+  <div *ngIf="!isLoading" class="tasks-grid">
+    <mat-card *ngFor="let task of tasks" class="task-card" [ngClass]="getStatusColor(task.priority)">
+      <mat-card-header>
+        <mat-card-title>{{ task.title }}</mat-card-title>
+        <mat-card-subtitle>
+          Status: {{ getFormattedStatus(task.status) }} |
+          Priority: {{ getFormattedPriority(task.priority) }}
+        </mat-card-subtitle>
+        
+        <div class="card-actions">
+          <button mat-raised-button color="primary" (click)="openTaskModal(task)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-raised-button color="warn" (click)="deleteTask(task.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </mat-card-header>
+      <mat-card-content class="task-card-content">
+        <p>{{ task.description }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

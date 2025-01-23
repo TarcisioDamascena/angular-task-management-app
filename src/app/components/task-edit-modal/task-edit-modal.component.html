@@ -1,0 +1,42 @@
+<h2 mat-dialog-title>{{data ? 'Edit task' : 'Create task'}}</h2>
+<mat-dialog-content>
+    <form [formGroup]="taskForm" class="task-form">
+        <mat-form-field appearance="fill">
+            <mat-label>Title</mat-label>
+            <input matInput formControlName="title" required placeholder="Enter task title">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="3" placeholder="Enter task description"></textarea>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Status</mat-label>
+            <mat-select formControlName="status" required>
+                <mat-option *ngFor="let status of statusOptions" [value]="status">
+                    {{ getFormattedStatus(status) }}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="taskForm.get('status')?.hasError('required')">Status is required</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Priority</mat-label>
+            <mat-select formControlName="priority" required>
+                <mat-option *ngFor="let priority of priorityOptions" [value]="priority">
+                    {{ getFormattedPriority(priority) }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+            <mat-label>Due Date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="dueDate" placeholder="Select due date">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="taskForm.invalid">
+        {{ data ? 'Update' : 'Create' }}
+    </button>
+</mat-dialog-actions>
