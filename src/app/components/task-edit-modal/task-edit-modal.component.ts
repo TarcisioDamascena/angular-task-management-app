@@ -7,10 +7,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS, MatNativeDateModule } from '@angular/material/core';
 import { TaskStatus } from '../../models/taskStatus';
 import { TaskPriority } from '../../models/taskPriority';
 import { Task } from '../../models/task';
+import { CustomDateAdapter } from '../../services/custom-date-adapter';
+import { CUSTOM_DATE_FORMATS } from '../../services/custom-date-format';
 
 @Component({
   selector: 'app-task-edit-modal',
@@ -28,7 +30,11 @@ import { Task } from '../../models/task';
     MatNativeDateModule
   ],
   templateUrl: './task-edit-modal.component.html',
-  styleUrl: './task-edit-modal.component.css'
+  styleUrl: './task-edit-modal.component.css',
+  providers: [
+    {provide: DateAdapter, useClass: CustomDateAdapter},
+    {provide: MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS}
+  ]
 })
 export class TaskEditModalComponent {
 
