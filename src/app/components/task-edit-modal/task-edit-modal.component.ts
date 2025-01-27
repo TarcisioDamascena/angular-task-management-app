@@ -41,18 +41,21 @@ export class TaskEditModalComponent {
   taskForm: FormGroup;
   statusOptions = Object.values(TaskStatus);
   priorityOptions = Object.values(TaskPriority);
+  minDate = new Date();
 
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<TaskEditModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Task | null,
   ) {
+    this.minDate.setHours(0, 0, 0, 0);
+
     this.taskForm = this.fb.group({
       title: [data?.title || '', Validators.required],
       description: [data?.description || ''],
       status: [data?.status || TaskStatus.TODO, Validators.required],
       priority: [data?.priority || TaskPriority.MEDIUM, Validators.required],
-      dueDate: [data?.dueDate ? new Date(data.dueDate) : null]
+      dueDate: [data?.dueDate ? new Date(data.dueDate) : null, Validators.required],
     })
   }
 
