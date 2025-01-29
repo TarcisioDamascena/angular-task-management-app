@@ -51,12 +51,17 @@ export class TaskEditModalComponent {
     this.minDate.setHours(0, 0, 0, 0);
 
     this.taskForm = this.fb.group({
-      title: [data?.title || '', Validators.required],
-      description: [data?.description || ''],
+      title: [this.capitalizeFirstLetter(data?.title) || '', Validators.required],
+      description: [this.capitalizeFirstLetter(data?.description) || ''],
       status: [data?.status || TaskStatus.TODO, Validators.required],
       priority: [data?.priority || TaskPriority.MEDIUM, Validators.required],
       dueDate: [data?.dueDate ? new Date(data.dueDate) : null, Validators.required],
     })
+  }
+
+  private capitalizeFirstLetter(text: string | undefined): string {
+    if (!text) return '';
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   getFormattedStatus(status: TaskStatus): string {
