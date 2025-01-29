@@ -34,14 +34,24 @@
         </mat-card-content>
 
         <mat-card-footer class="card-footer">
-          <span class="due-date" [matTooltip]="getDueDateStatus(task.dueDate).message">
-            <mat-icon 
-              [style.color]="getDueDateStatus(task.dueDate).color"
-              class="date-icon">
-              {{ getDueDateStatus(task.dueDate).icon }}
-            </mat-icon>
-            {{ task.dueDate | date:'mediumDate' }}
-          </span>
+          <div class="footer-left">
+            <mat-checkbox 
+              [checked]="task.status === 'COMPLETED'" 
+              (change)="toggleTaskCompletion(task)"
+              class="completion-checkbox">
+
+            </mat-checkbox>
+          </div>
+          <div class="footer-right">
+            <span class="due-date" [matTooltip]="getDueDateStatus(task.dueDate, task.status).message">
+              <mat-icon 
+                [style.color]="getDueDateStatus(task.dueDate, task.status).color"
+                class="date-icon">
+                {{ getDueDateStatus(task.dueDate, task.status).icon }}
+              </mat-icon>
+              {{ task.dueDate | date:'mediumDate' }}
+            </span>
+          </div>
         </mat-card-footer>
       </div>
     </mat-card>

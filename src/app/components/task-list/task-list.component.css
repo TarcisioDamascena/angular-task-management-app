@@ -116,15 +116,31 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.9rem;
-  color: rgba(0, 0, 0, 0.7);
 }
 
 .date-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  transition: color 0.3s ease;
+  vertical-align: middle;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+
+.completion-checkbox {
+  margin-right: 8px;
 }
 
 /* Add a subtle shake animation for overdue tasks */

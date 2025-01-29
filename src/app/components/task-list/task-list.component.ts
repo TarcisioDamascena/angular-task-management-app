@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { Task } from '../../models/task';
 import { TaskStatus } from '../../models/taskStatus';
 import { TaskPriority } from '../../models/taskPriority';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule} from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-task-list',
@@ -26,7 +27,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatCardModule,
     MatDialogModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatCheckboxModule
+    
   ],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css'
@@ -165,7 +168,15 @@ export class TaskListComponent {
     return now > due;
   }
 
-  getDueDateStatus(dueDate: string | Date | undefined): { icon: string; color: string; message: string } {
+  getDueDateStatus(dueDate: string | Date | undefined, status: TaskStatus): { icon: string; color: string; message: string } {
+    if (status === TaskStatus.COMPLETED) {
+      return {
+        icon: 'check_circle',
+        color: '#4CAF50', // Material Green
+        message: 'Task completed!'
+      };
+    }
+  
     if (!dueDate) {
       return {
         icon: 'event',
@@ -173,7 +184,7 @@ export class TaskListComponent {
         message: 'No due date set'
       };
     }
-
+  
     if (this.isOverdue(dueDate)) {
       return {
         icon: 'error',
@@ -193,6 +204,25 @@ export class TaskListComponent {
       color: 'rgba(0, 0, 0, 0.7)',
       message: ''
     };
+  }
+
+  toggleTaskCompletion(task: Task): void {
+    const newStatus = task.status === TaskStatus.COMPLETED ? TaskStatus.TODO : TaskStatus.COMPLETED;  
+
+    const updatedTask = {...task, status: newStatus};
+
+    this.taskService.updateTask(task.id, updatedTask).subscribe({
+      next: () => {
+        this.loadTasks();
+        const message = newStatus === TaskStatus.COMPLETED ?
+        'Task marked as completed' :
+        'Task unmarked as completed';
+        this.snackBar.open(message, 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        this.snackBar.open('Error updating task status', 'Close', { duration: 3000 });
+      }
+    })
   }
 
 }
