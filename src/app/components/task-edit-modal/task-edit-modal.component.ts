@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -51,17 +51,55 @@ export class TaskEditModalComponent {
     this.minDate.setHours(0, 0, 0, 0);
 
     this.taskForm = this.fb.group({
-      title: [this.capitalizeFirstLetter(data?.title) || '', Validators.required],
-      description: [this.capitalizeFirstLetter(data?.description) || ''],
+      title: [
+        this.capitalizeFirstLetter(data?.title) || '', 
+        [Validators.required, this.capitalizeValidator()]
+      ],
+      description: [
+        this.capitalizeFirstLetter(data?.description) || '',
+        [this.capitalizeValidator()]
+      ],
       status: [data?.status || TaskStatus.TODO, Validators.required],
       priority: [data?.priority || TaskPriority.MEDIUM, Validators.required],
       dueDate: [data?.dueDate ? new Date(data.dueDate) : null, Validators.required],
-    })
+    });
+
+    this.taskForm.get('title')?.valueChanges.subscribe(value => {
+      if (value) {
+        const capitalizedValue = this.capitalizeFirstLetter(value);
+        if (capitalizedValue !== value) {
+          this.taskForm.patchValue({ title: capitalizedValue }, { emitEvent: false });
+        }
+      }
+    });
+
+    this.taskForm.get('description')?.valueChanges.subscribe(value => {
+      if (value) {
+        const capitalizedValue = this.capitalizeFirstLetter(value);
+        if (capitalizedValue !== value) {
+          this.taskForm.patchValue({ description: capitalizedValue }, { emitEvent: false });
+        }
+      }
+    });
+    
   }
 
   private capitalizeFirstLetter(text: string | undefined): string {
     if (!text) return '';
     return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  private capitalizeValidator() {
+    return (control: AbstractControl): ValidationErrors | null => {
+      if (!control.value) {
+        return null;
+      }
+      const capitalized = this.capitalizeFirstLetter(control.value);
+      if (control.value !== capitalized) {
+        return { capitalize: true };
+      }
+      return null;
+    };
   }
 
   getFormattedStatus(status: TaskStatus): string {
