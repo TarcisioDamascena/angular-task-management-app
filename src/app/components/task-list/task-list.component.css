@@ -16,43 +16,66 @@
 
 .tasks-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 345px));
   gap: 20px;
-}
-
-@media (min-width: 1200px) {
-  .tasks-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  justify-content: flex-start;
 }
 
 .task-card {
-  height: 100%;
+  width: 100%;
+  max-width: 345px;
+  height: 280px !important;
   padding: 0;
+  max-height: 280px;
+  min-height: 280px;
 }
 
 .card-content-wrapper {
   display: flex;
   flex-direction: column;
-  height: 280px;
-  position: relative;
+  height: 100%;
   padding: 16px;
+  box-sizing: border-box;
+}
+
+.task-card mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+}
+
+.title-container {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16px;
 }
 
 .task-title {
   font-size: 1.2rem;
-  margin-bottom: 8px;
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: block;
+  line-height: 1.2;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .metadata-section {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-top: 8px;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .metadata-item {
@@ -67,6 +90,7 @@
   background-color: rgba(0, 0, 0, 0.02);
   border-radius: 4px;
   overflow: hidden;
+  min-height: 0;
 }
 
 .description {
@@ -81,18 +105,11 @@
   max-height: calc(1.4em * 5);
 }
 
-.card-actions {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 8px;
-}
-
 .card-footer {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .due-date {
@@ -109,19 +126,23 @@
   height: 18px;
 }
 
-/* Priority-based color classes */
+/* Kanban priority colors */
 .urgent-priority {
-  border-left: 5px solid #ff0000;
+  border-left: 5px solid #E84A5F;
+  background-color: rgba(232, 74, 95, 0.05);
 }
 
 .high-priority {
-  border-left: 5px solid #ff6b6b;
+  border-left: 5px solid #FF9F1C;
+  background-color: rgba(255, 159, 28, 0.05);
 }
 
 .medium-priority {
-  border-left: 5px solid #ffa500;
+  border-left: 5px solid #2AB7CA;
+  background-color: rgba(42, 183, 202, 0.05);
 }
 
 .low-priority {
-  border-left: 5px solid #4caf50;
+  border-left: 5px solid #99C24D;
+  background-color: rgba(153, 194, 77, 0.05);
 }
