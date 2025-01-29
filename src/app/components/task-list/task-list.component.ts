@@ -13,7 +13,9 @@ import { Task } from '../../models/task';
 import { TaskStatus } from '../../models/taskStatus';
 import { TaskPriority } from '../../models/taskPriority';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatCheckboxModule} from '@angular/material/checkbox';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
+import { BehaviorSubject, finalize } from 'rxjs';
 
 @Component({
   selector: 'app-task-list',
@@ -29,16 +31,33 @@ import { MatCheckboxModule} from '@angular/material/checkbox';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatCheckboxModule
-    
+
   ],
   templateUrl: './task-list.component.html',
-  styleUrl: './task-list.component.css'
+  styleUrl: './task-list.component.css',
+  animations: [
+    trigger('taskChanges', [
+      transition('* => *', [
+        query(':enter', [
+          style({ opacity: 0, transform: 'translateY(20px)' }),
+          stagger('50ms', [
+            animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+          ])
+        ], { optional: true }),
+        query(':leave', [
+          animate('200ms ease-in', style({ opacity: 0, transform: 'scale(0.95)' }))
+        ], { optional: true })
+      ])
+    ])
+  ]
 })
 export class TaskListComponent {
 
-  tasks: Task[] = [];
+  private tasksSubject = new BehaviorSubject<Task[]>([]);
+  tasks$ = this.tasksSubject.asObservable();
   displayedColumns: string[] = ['title', 'status', 'priority', 'actions'];
   isLoading: boolean = true;
+  pendingOperations = new Set<number>();
 
   constructor(
     private taskService: TaskService,
@@ -52,22 +71,31 @@ export class TaskListComponent {
 
   loadTasks(): void {
     this.isLoading = true;
-    this.taskService.getTasks().subscribe({
-      next: (tasks) => {
-        this.tasks = tasks
-        this.isLoading = false;
-      },
+    this.taskService.getTasks().pipe(
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: (tasks) => this.tasksSubject.next(tasks),
       error: (error) => {
-        console.error('Error loading tasks:', error)
-        this.isLoading = false;
+        console.error('Error loading tasks:', error);
+        this.snackBar.open('Error loading tasks', 'Close', { duration: 3000 });
       }
     });
   }
 
   deleteTask(taskId: number): void {
-    this.taskService.deleteTask(taskId).subscribe({
-      next: () => this.loadTasks(),
-      error: (error) => console.error('Error deleting task:', error)
+    this.pendingOperations.add(taskId);
+    this.taskService.deleteTask(taskId).pipe(
+      finalize(() => this.pendingOperations.delete(taskId))
+    ).subscribe({
+      next: () => {
+        const currentTasks = this.tasksSubject.value;
+        this.tasksSubject.next(currentTasks.filter(task => task.id !== taskId));
+        this.snackBar.open('Task deleted successfully', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error deleting task:', error);
+        this.snackBar.open('Error deleting task', 'Close', { duration: 3000 });
+      }
     });
   }
 
@@ -77,28 +105,68 @@ export class TaskListComponent {
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        if (task) {
-          this.taskService.updateTask(task.id, result).subscribe({
-            next: () => {
-              this.loadTasks();
-              this.snackBar.open('Task updated successfully', 'Close', { duration: 3000 });
-            },
-            error: (error) => {
-              this.snackBar.open('Error updating task', 'Close', { duration: 3000 });
+      if (!result) return;
+
+      if (task) {
+        this.pendingOperations.add(task.id);
+        this.taskService.updateTask(task.id, result).pipe(
+          finalize(() => this.pendingOperations.delete(task.id))
+        ).subscribe({
+          next: (updatedTask) => {
+            const currentTasks = this.tasksSubject.value;
+            const taskIndex = currentTasks.findIndex(t => t.id === task.id);
+            if (taskIndex !== -1) {
+              const updatedTasks = [...currentTasks];
+              updatedTasks[taskIndex] = updatedTask;
+              this.tasksSubject.next(updatedTasks);
             }
-          });
-        } else {
-          this.taskService.createTask(result).subscribe({
-            next: () => {
-              this.loadTasks();
-              this.snackBar.open('Task created successfully', 'Close', { duration: 3000 });
-            },
-            error: (error) => {
-              this.snackBar.open('Error creating task', 'Close', { duration: 3000 });
-            }
-          });
+            this.snackBar.open('Task updated successfully', 'Close', { duration: 3000 });
+          },
+          error: (error) => {
+            console.error('Error updating task:', error);
+            this.snackBar.open('Error updating task', 'Close', { duration: 3000 });
+          }
+        });
+      } else {
+        this.taskService.createTask(result).subscribe({
+          next: (newTask) => {
+            const currentTasks = this.tasksSubject.value;
+            this.tasksSubject.next([...currentTasks, newTask]);
+            this.snackBar.open('Task created successfully', 'Close', { duration: 3000 });
+          },
+          error: (error) => {
+            console.error('Error creating task:', error);
+            this.snackBar.open('Error creating task', 'Close', { duration: 3000 });
+          }
+        });
+      }
+    });
+  }
+
+  toggleTaskCompletion(task: Task): void {
+    const newStatus = task.status === TaskStatus.COMPLETED ? TaskStatus.TODO : TaskStatus.COMPLETED;
+    const updatedTask = { ...task, status: newStatus };
+
+    this.pendingOperations.add(task.id);
+    this.taskService.updateTask(task.id, updatedTask).pipe(
+      finalize(() => this.pendingOperations.delete(task.id))
+    ).subscribe({
+      next: (result) => {
+        const currentTasks = this.tasksSubject.value;
+        const taskIndex = currentTasks.findIndex(t => t.id === task.id);
+        if (taskIndex !== -1) {
+          const updatedTasks = [...currentTasks];
+          updatedTasks[taskIndex] = result;
+          this.tasksSubject.next(updatedTasks);
         }
+        const message = newStatus === TaskStatus.COMPLETED ?
+          'Task marked as completed' :
+          'Task unmarked as completed';
+        this.snackBar.open(message, 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error updating task status:', error);
+        this.snackBar.open('Error updating task status', 'Close', { duration: 3000 });
       }
     });
   }
@@ -153,7 +221,7 @@ export class TaskListComponent {
     const today = this.stripTime(new Date());
     const due = this.stripTime(new Date(dueDate));
     if (isNaN(due.getTime())) return false;
-    
+
     const diffTime = due.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays <= 3 && diffDays >= 0;
@@ -164,7 +232,7 @@ export class TaskListComponent {
     const now = new Date();
     const due = this.getEndOfDay(new Date(dueDate));
     if (isNaN(due.getTime())) return false;
-    
+
     return now > due;
   }
 
@@ -176,7 +244,7 @@ export class TaskListComponent {
         message: 'Task completed!'
       };
     }
-  
+
     if (!dueDate) {
       return {
         icon: 'event',
@@ -184,7 +252,7 @@ export class TaskListComponent {
         message: 'No due date set'
       };
     }
-  
+
     if (this.isOverdue(dueDate)) {
       return {
         icon: 'error',
@@ -204,25 +272,6 @@ export class TaskListComponent {
       color: 'rgba(0, 0, 0, 0.7)',
       message: ''
     };
-  }
-
-  toggleTaskCompletion(task: Task): void {
-    const newStatus = task.status === TaskStatus.COMPLETED ? TaskStatus.TODO : TaskStatus.COMPLETED;  
-
-    const updatedTask = {...task, status: newStatus};
-
-    this.taskService.updateTask(task.id, updatedTask).subscribe({
-      next: () => {
-        this.loadTasks();
-        const message = newStatus === TaskStatus.COMPLETED ?
-        'Task marked as completed' :
-        'Task unmarked as completed';
-        this.snackBar.open(message, 'Close', { duration: 3000 });
-      },
-      error: (error) => {
-        this.snackBar.open('Error updating task status', 'Close', { duration: 3000 });
-      }
-    })
   }
 
 }

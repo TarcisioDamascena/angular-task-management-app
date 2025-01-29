@@ -1,59 +1,92 @@
 <div class="task-list-container">
   <div class="header">
-    <h2>My Tasks</h2>
+    <h2>Tasks</h2>
     <button mat-raised-button color="primary" (click)="openTaskModal()">
       <mat-icon>add</mat-icon>
-      Create Task
+      Add Task
     </button>
   </div>
-  <mat-progress-spinner *ngIf="isLoading" mode="indeterminate" class="loading-spinner" />
-  <div *ngIf="!isLoading" class="tasks-grid">
-    <mat-card *ngFor="let task of tasks" class="task-card" [ngClass]="getStatusColor(task.priority)">
-      <div class="card-content-wrapper">
-        <mat-card-header>
-          <div class="title-container">
-            <mat-card-title class="task-title">{{ task.title }}</mat-card-title>
-          </div>
-          <div class="card-actions">
-            <button mat-icon-button color="primary" (click)="openTaskModal(task)">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="deleteTask(task.id)">
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
-        </mat-card-header>
 
-        <div class="metadata-section">
-          <span class="metadata-item">Status: {{ getFormattedStatus(task.status) }}</span>
-          <span class="metadata-item">Priority: {{ getFormattedPriority(task.priority) }}</span>
+  <ng-container *ngIf="tasks$ | async as tasks">
+    <div class="tasks-grid" [@taskChanges]="tasks.length">
+      <ng-container *ngIf="tasks.length > 0; else emptyState">
+        <mat-card *ngFor="let task of tasks" [class]="getStatusColor(task.priority)" class="task-card">
+          <div class="card-content-wrapper">
+            <!-- Card Header -->
+            <mat-card-header>
+              <div class="title-container">
+                <h3 class="task-title" [matTooltip]="task.title">{{ task.title }}</h3>
+              </div>
+              <div class="card-actions">
+                <button mat-icon-button [matTooltip]="'Edit task'" 
+                        (click)="openTaskModal(task)"
+                        [disabled]="pendingOperations.has(task.id)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" 
+                        [matTooltip]="'Delete task'" 
+                        (click)="deleteTask(task.id)"
+                        [disabled]="pendingOperations.has(task.id)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-card-header>
+
+            <!-- Metadata Section -->
+            <div class="metadata-section">
+              <span class="metadata-item">Status: {{ getFormattedStatus(task.status) }}</span>
+              <span class="metadata-item">Priority: {{ getFormattedPriority(task.priority) }}</span>
+            </div>
+
+            <!-- Task Description -->
+            <div class="task-card-content">
+              <p class="description">{{ task.description }}</p>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="card-footer">
+              <div class="footer-left">
+                <mat-checkbox
+                  class="completion-checkbox"
+                  [checked]="task.status === 'COMPLETED'"
+                  (change)="toggleTaskCompletion(task)"
+                  [disabled]="pendingOperations.has(task.id)">
+                </mat-checkbox>
+                <div class="due-date">
+                  <mat-icon
+                    [style.color]="getDueDateStatus(task.dueDate, task.status).color"
+                    [matTooltip]="getDueDateStatus(task.dueDate, task.status).message"
+                    class="date-icon">
+                    {{ getDueDateStatus(task.dueDate, task.status).icon }}
+                  </mat-icon>
+                  <span>{{ task.dueDate | date }}</span>
+                </div>
+              </div>
+              <div class="footer-right">
+                <mat-spinner *ngIf="pendingOperations.has(task.id)" 
+                            diameter="20" 
+                            class="operation-spinner">
+                </mat-spinner>
+              </div>
+            </div>
+          </div>
+        </mat-card>
+      </ng-container>
+
+      <!-- Empty State Template -->
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <mat-icon class="empty-state-icon">assignment</mat-icon>
+          <h3>No tasks yet</h3>
+          <p>Click the 'Add Task' button to create your first task</p>
         </div>
+      </ng-template>
+    </div>
+  </ng-container>
 
-        <mat-card-content class="task-card-content">
-          <p class="description">{{ task.description || 'No description provided' }}</p>
-        </mat-card-content>
-
-        <mat-card-footer class="card-footer">
-          <div class="footer-left">
-            <mat-checkbox 
-              [checked]="task.status === 'COMPLETED'" 
-              (change)="toggleTaskCompletion(task)"
-              class="completion-checkbox">
-
-            </mat-checkbox>
-          </div>
-          <div class="footer-right">
-            <span class="due-date" [matTooltip]="getDueDateStatus(task.dueDate, task.status).message">
-              <mat-icon 
-                [style.color]="getDueDateStatus(task.dueDate, task.status).color"
-                class="date-icon">
-                {{ getDueDateStatus(task.dueDate, task.status).icon }}
-              </mat-icon>
-              {{ task.dueDate | date:'mediumDate' }}
-            </span>
-          </div>
-        </mat-card-footer>
-      </div>
-    </mat-card>
-  </div>
+  <!-- Loading State -->
+  <mat-spinner *ngIf="isLoading" 
+               diameter="40" 
+               class="loading-spinner">
+  </mat-spinner>
 </div>
