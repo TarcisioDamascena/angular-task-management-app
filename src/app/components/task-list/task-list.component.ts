@@ -5,13 +5,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TaskService } from '../../services/task.service';
 import { TaskEditModalComponent } from '../task-edit-modal/task-edit-modal.component';
 import { Task } from '../../models/task';
 import { TaskStatus } from '../../models/taskStatus';
 import { TaskPriority } from '../../models/taskPriority';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-task-list',
@@ -24,7 +25,8 @@ import { TaskPriority } from '../../models/taskPriority';
     MatIconModule,
     MatCardModule,
     MatDialogModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css'
@@ -131,6 +133,66 @@ export class TaskListComponent {
       [TaskPriority.URGENT]: 'Urgent'
     }
     return priorityMap[priority] || '';
+  }
+
+  private getEndOfDay(date: Date): Date {
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+    return endOfDay;
+  }
+
+  private stripTime(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
+  isDueSoon(dueDate: string | Date | undefined): boolean {
+    if (!dueDate) return false;
+    const today = this.stripTime(new Date());
+    const due = this.stripTime(new Date(dueDate));
+    if (isNaN(due.getTime())) return false;
+    
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 3 && diffDays >= 0;
+  }
+
+  isOverdue(dueDate: string | Date | undefined): boolean {
+    if (!dueDate) return false;
+    const now = new Date();
+    const due = this.getEndOfDay(new Date(dueDate));
+    if (isNaN(due.getTime())) return false;
+    
+    return now > due;
+  }
+
+  getDueDateStatus(dueDate: string | Date | undefined): { icon: string; color: string; message: string } {
+    if (!dueDate) {
+      return {
+        icon: 'event',
+        color: 'rgba(0, 0, 0, 0.7)',
+        message: 'No due date set'
+      };
+    }
+
+    if (this.isOverdue(dueDate)) {
+      return {
+        icon: 'error',
+        color: '#E84A5F',
+        message: 'Task is overdue!'
+      };
+    }
+    if (this.isDueSoon(dueDate)) {
+      return {
+        icon: 'warning',
+        color: '#FF9F1C',
+        message: 'Due soon!'
+      };
+    }
+    return {
+      icon: 'event',
+      color: 'rgba(0, 0, 0, 0.7)',
+      message: ''
+    };
   }
 
 }
