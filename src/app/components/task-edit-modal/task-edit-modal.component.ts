@@ -39,7 +39,7 @@ import { CUSTOM_DATE_FORMATS } from '../../services/custom-date-format';
 export class TaskEditModalComponent {
 
   taskForm: FormGroup;
-  statusOptions = Object.values(TaskStatus);
+  statusOptions = Object.values(TaskStatus).filter(status => status !== TaskStatus.COMPLETED);
   priorityOptions = Object.values(TaskPriority);
   minDate = new Date();
 
@@ -50,6 +50,10 @@ export class TaskEditModalComponent {
   ) {
     this.minDate.setHours(0, 0, 0, 0);
 
+    const initialStatus = data?.status === TaskStatus.COMPLETED
+    ? TaskStatus.IN_PROGRESS
+    :(data?.status || TaskStatus.TODO);
+
     this.taskForm = this.fb.group({
       title: [
         this.capitalizeFirstLetter(data?.title) || '', 
@@ -59,7 +63,7 @@ export class TaskEditModalComponent {
         this.capitalizeFirstLetter(data?.description) || '',
         [this.capitalizeValidator()]
       ],
-      status: [data?.status || TaskStatus.TODO, Validators.required],
+      status: [initialStatus, Validators.required],
       priority: [data?.priority || TaskPriority.MEDIUM, Validators.required],
       dueDate: [data?.dueDate ? new Date(data.dueDate) : null, Validators.required],
     });
@@ -103,10 +107,9 @@ export class TaskEditModalComponent {
   }
 
   getFormattedStatus(status: TaskStatus): string {
-    const statusMap = {
+    const statusMap: Partial<Record<TaskStatus, string>> = {
       [TaskStatus.TODO]: 'To Do',
       [TaskStatus.IN_PROGRESS]: 'In Progress',
-      [TaskStatus.COMPLETED]: 'Completed',
       [TaskStatus.CANCELLED]: 'Cancelled'
     };
     return statusMap[status] || '';
