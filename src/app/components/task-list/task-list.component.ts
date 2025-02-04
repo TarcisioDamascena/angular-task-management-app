@@ -16,6 +16,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { animate, query, stagger, style, transition, trigger } from '@angular/animations';
 import { BehaviorSubject, finalize } from 'rxjs';
+import { TaskCardComponent } from '../task-card/task-card.component';
+import { CreateTask } from '../../models/createTask';
 
 @Component({
   selector: 'app-task-list',
@@ -30,7 +32,8 @@ import { BehaviorSubject, finalize } from 'rxjs';
     MatDialogModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    TaskCardComponent
 
   ],
   templateUrl: './task-list.component.html',
@@ -108,37 +111,53 @@ export class TaskListComponent {
       if (!result) return;
 
       if (task) {
-        this.pendingOperations.add(task.id);
-        this.taskService.updateTask(task.id, result).pipe(
-          finalize(() => this.pendingOperations.delete(task.id))
-        ).subscribe({
-          next: (updatedTask) => {
-            const currentTasks = this.tasksSubject.value;
-            const taskIndex = currentTasks.findIndex(t => t.id === task.id);
-            if (taskIndex !== -1) {
-              const updatedTasks = [...currentTasks];
-              updatedTasks[taskIndex] = updatedTask;
-              this.tasksSubject.next(updatedTasks);
-            }
-            this.snackBar.open('Task updated successfully', 'Close', { duration: 3000 });
-          },
-          error: (error) => {
-            console.error('Error updating task:', error);
-            this.snackBar.open('Error updating task', 'Close', { duration: 3000 });
-          }
-        });
+        this.updateExistingTask(task, result);
       } else {
-        this.taskService.createTask(result).subscribe({
-          next: (newTask) => {
-            const currentTasks = this.tasksSubject.value;
-            this.tasksSubject.next([...currentTasks, newTask]);
-            this.snackBar.open('Task created successfully', 'Close', { duration: 3000 });
-          },
-          error: (error) => {
-            console.error('Error creating task:', error);
-            this.snackBar.open('Error creating task', 'Close', { duration: 3000 });
-          }
-        });
+        this.createNewTask(result);
+      }
+    });
+  }
+
+  private updateExistingTask(task: Task, updatedData: Task): void {
+    this.pendingOperations.add(task.id);
+    this.taskService.updateTask(task.id, updatedData).pipe(
+      finalize(() => this.pendingOperations.delete(task.id))
+    ).subscribe({
+      next: (updatedTask) => {
+        const currentTasks = this.tasksSubject.value;
+        const taskIndex = currentTasks.findIndex(t => t.id === task.id);
+        if (taskIndex !== -1) {
+          const updatedTasks = [...currentTasks];
+          updatedTasks[taskIndex] = updatedTask;
+          this.tasksSubject.next(updatedTasks);
+        }
+        this.snackBar.open('Task updated successfully', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error updating task:', error);
+        this.snackBar.open('Error updating task', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  private createNewTask(taskData: Task): void {
+    const createTaskData: CreateTask = {
+      title: taskData.title || '',
+      description: taskData.description || '',
+      status: taskData.status || TaskStatus.TODO,
+      priority: taskData.priority || TaskPriority.MEDIUM,
+      dueDate: taskData.dueDate || new Date().toISOString()
+    };
+
+    this.taskService.createTask(createTaskData).subscribe({
+      next: (newTask) => {
+        const currentTasks = this.tasksSubject.value;
+        this.tasksSubject.next([...currentTasks, newTask]);
+        this.snackBar.open('Task created successfully', 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error creating task:', error);
+        this.snackBar.open('Error creating task', 'Close', { duration: 3000 });
       }
     });
   }

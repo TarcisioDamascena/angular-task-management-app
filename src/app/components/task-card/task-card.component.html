@@ -1,0 +1,43 @@
+<mat-card [class]="getStatusColor(task.priority)" class="task-card">
+    <div class="card-content-wrapper">
+        <mat-card-header>
+            <div class="title-container">
+                <h3 class="task-title" [matTooltip]="task.title">{{ task.title }}</h3>
+            </div>
+            <div class="card-actions">
+                <button mat-icon-button [matTooltip]="'Edit task'" (click)="onEdit.emit(task)" [disabled]="isPending">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" [matTooltip]="'Delete task'" (click)="onDelete.emit(task.id)"
+                    [disabled]="isPending">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+        </mat-card-header>
+        <div class="metadata-section">
+            <span class="metadata-item">Status: {{ getFormattedStatus(task.status) }}</span>
+            <span class="metadata-item">Priority: {{ getFormattedPriority(task.priority) }}</span>
+        </div>
+        <div class="task-card-content">
+            <p class="description">{{ task.description }}</p>
+        </div>
+        <div class="card-footer">
+            <div class="footer-left">
+                <mat-checkbox class="completion-checkbox" [checked]="task.status === 'COMPLETED'"
+                    (change)="onToggleCompletion.emit(task)" [disabled]="isPending">
+                </mat-checkbox>
+                <div class="due-date">
+                    <mat-icon [style.color]="getDueDateStatus(task.dueDate, task.status).color"
+                        [matTooltip]="getDueDateStatus(task.dueDate, task.status).message" class="date-icon">
+                        {{ getDueDateStatus(task.dueDate, task.status).icon }}
+                    </mat-icon>
+                    <span>{{ task.dueDate | date }}</span>
+                </div>
+            </div>
+            <div class="footer-right">
+                <mat-spinner *ngIf="isPending" diameter="20" class="operation-spinner">
+                </mat-spinner>
+            </div>
+        </div>
+    </div>
+</mat-card>

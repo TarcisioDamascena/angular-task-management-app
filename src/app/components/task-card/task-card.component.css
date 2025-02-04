@@ -1,0 +1,177 @@
+.task-card {
+    width: 100%;
+    max-width: 345px;
+    height: 280px !important;
+    padding: 0;
+    max-height: 280px;
+    min-height: 280px;
+    position: relative;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+}
+
+.card-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.task-card mat-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    height: 32px;
+    margin: 0;
+    padding: 0;
+}
+
+.title-container {
+    flex: 1;
+    min-width: 0;
+    margin-right: 16px;
+}
+
+.task-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.metadata-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.metadata-item {
+    font-size: 0.9rem;
+    color: rgba(0, 0, 0, 0.7);
+}
+
+.task-card-content {
+    flex: 1;
+    margin: 0;
+    padding: 12px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 4px;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.description {
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    line-clamp: 5;
+    overflow-x: hidden;
+    overflow-y: auto;
+    line-height: 1.4;
+    max-height: calc(1.4em * 5);
+}
+
+.card-footer {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.footer-right {
+    display: flex;
+    align-items: center;
+}
+
+.due-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.date-icon {
+    vertical-align: middle;
+}
+
+.completion-checkbox {
+    margin-right: 8px;
+}
+
+.operation-spinner {
+    margin-left: 8px;
+}
+
+.loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Add a subtle shake animation for overdue tasks */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-2px);
+    }
+
+    75% {
+        transform: translateX(2px);
+    }
+}
+
+.date-icon[style*="color: #E84A5F"] {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Kanban priority colors */
+.urgent-priority {
+    border-left: 5px solid #E84A5F;
+    background-color: rgba(232, 74, 95, 0.05);
+}
+
+.high-priority {
+    border-left: 5px solid #FF9F1C;
+    background-color: rgba(255, 159, 28, 0.05);
+}
+
+.medium-priority {
+    border-left: 5px solid #2AB7CA;
+    background-color: rgba(42, 183, 202, 0.05);
+}
+
+.low-priority {
+    border-left: 5px solid #99C24D;
+    background-color: rgba(153, 194, 77, 0.05);
+}
