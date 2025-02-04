@@ -29,9 +29,9 @@ export class TaskCardComponent {
   @Input() task!: Task;
   @Input() isPending: boolean = false;
 
-  @Output() onToggleCompletion = new EventEmitter<Task>();
-  @Output() onDelete = new EventEmitter<number>();
   @Output() onEdit = new EventEmitter<Task>();
+  @Output() onDelete = new EventEmitter<number>();
+  @Output() onToggleCompletion = new EventEmitter<Task>();
 
   getStatusColor(priority: TaskPriority): string {
     switch (priority) {
@@ -44,13 +44,11 @@ export class TaskCardComponent {
   }
 
   getFormattedStatus(status: TaskStatus): string {
-
-    const statusMap: Record<TaskStatus, string> = {
+    const statusMap = {
       [TaskStatus.TODO]: 'To Do',
       [TaskStatus.IN_PROGRESS]: 'In Progress',
       [TaskStatus.COMPLETED]: 'Completed',
       [TaskStatus.CANCELLED]: 'Cancelled'
-
     };
     return statusMap[status] || '';
   }

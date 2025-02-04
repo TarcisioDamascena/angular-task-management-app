@@ -143,7 +143,7 @@ export class TaskListComponent {
   private createNewTask(taskData: Task): void {
     const createTaskData: CreateTask = {
       title: taskData.title || '',
-      description: taskData.description || '',
+      description: taskData.description || 'No description provided. This task was created without additional details.',
       status: taskData.status || TaskStatus.TODO,
       priority: taskData.priority || TaskPriority.MEDIUM,
       dueDate: taskData.dueDate || new Date().toISOString()
