@@ -1,0 +1,82 @@
+/* task-filter-sidebar.component.css */
+.filter-sidebar {
+  width: 320px;
+  padding: 24px 16px;
+  background-color: white;
+  border-left: 1px solid #e5e7eb;
+  height: 100%;
+  overflow-y: auto;
+  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 0 8px;
+}
+
+.filter-header h3 {
+  margin: 0;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 1.25rem;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+mat-expansion-panel {
+  background-color: transparent;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  box-shadow: none !important;
+}
+
+mat-expansion-panel-header {
+  height: 48px;
+  padding: 0 16px;
+}
+
+::ng-deep .mat-expansion-panel {
+  background-color: #f8f9fa !important;
+  margin-bottom: 12px;
+}
+
+::ng-deep .mat-expansion-panel-header {
+  background-color: #f8f9fa !important;
+}
+
+::ng-deep .mat-expansion-panel-body {
+  padding: 16px !important;
+  background-color: white;
+}
+
+::ng-deep .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header:hover:not([aria-disabled=true]) {
+  background-color: #f1f3f5 !important;
+}
+
+/* Responsive styles */
+@media (max-width: 1024px) {
+  .filter-sidebar {
+    width: 100%;
+    height: auto;
+    border-left: none;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 16px;
+    order: 1;
+  }
+
+  .filter-header {
+    margin-bottom: 16px;
+  }
+}
+
+:host {
+  display: block;
+  height: 100%;
+  overflow-y: auto;
+}

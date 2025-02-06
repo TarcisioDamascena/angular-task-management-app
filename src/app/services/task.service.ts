@@ -4,8 +4,6 @@ import { catchError, Observable, throwError } from 'rxjs';
 import { Task } from '../models/task';
 import { CreateTask } from '../models/createTask';
 import { UpdateTask } from '../models/updateTask';
-import { TaskStatus } from '../models/taskStatus';
-import { TaskPriority } from '../models/taskPriority';
 
 @Injectable({
   providedIn: 'root'
@@ -58,21 +56,5 @@ export class TaskService {
     }
     console.error(errorMessage);
     return throwError(() => new Error(errorMessage));
-  }
-
-  filterTasks(status?: TaskStatus, priority?: TaskPriority, dueDateBefore?: Date): Observable<Task[]> {
-    let params = new HttpParams();
-    if (status) {
-      params = params.set('status', status);
-    }
-    if (priority) {
-      params = params.set('priority', priority);
-    }
-    if (dueDateBefore) {
-      params = params.set('dueDateBefore', dueDateBefore.toISOString());
-    }
-    return this.http.get<Task[]>(this.API_URL +'/filter', { params }).pipe(
-      catchError(this.handleError)
-    );
   }
 }

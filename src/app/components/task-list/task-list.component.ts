@@ -18,6 +18,8 @@ import { animate, query, stagger, style, transition, trigger } from '@angular/an
 import { BehaviorSubject, finalize } from 'rxjs';
 import { TaskCardComponent } from '../task-card/task-card.component';
 import { CreateTask } from '../../models/createTask';
+import { TaskFilters } from '../../models/TaskFilters';
+import { TaskFilterComponent } from '../task-filter/task-filter.component';
 
 @Component({
   selector: 'app-task-list',
@@ -33,8 +35,8 @@ import { CreateTask } from '../../models/createTask';
     MatProgressSpinnerModule,
     MatTooltipModule,
     MatCheckboxModule,
-    TaskCardComponent
-
+    TaskCardComponent,
+    TaskFilterComponent
   ],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.css',
@@ -56,7 +58,7 @@ import { CreateTask } from '../../models/createTask';
 })
 export class TaskListComponent {
 
-  private tasksSubject = new BehaviorSubject<Task[]>([]);
+  tasksSubject = new BehaviorSubject<Task[]>([]);
   tasks$ = this.tasksSubject.asObservable();
   displayedColumns: string[] = ['title', 'status', 'priority', 'actions'];
   isLoading: boolean = true;
@@ -143,7 +145,7 @@ export class TaskListComponent {
   private createNewTask(taskData: Task): void {
     const createTaskData: CreateTask = {
       title: taskData.title || '',
-      description: taskData.description || 'No description provided. This task was created without additional details.',
+      description: taskData.description || 'you did not provide any description for this task!',
       status: taskData.status || TaskStatus.TODO,
       priority: taskData.priority || TaskPriority.MEDIUM,
       dueDate: taskData.dueDate || new Date().toISOString()
@@ -160,6 +162,99 @@ export class TaskListComponent {
         this.snackBar.open('Error creating task', 'Close', { duration: 3000 });
       }
     });
+  }
+
+  private filterTasks(tasks: Task[], filters: TaskFilters): Task[] {
+    return tasks.filter(task => {
+      if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
+        return false;
+      }
+
+      if (filters.status.length > 0 && !filters.status.includes(task.status)) {
+        return false;
+      }
+
+      if (filters.priority.length > 0 && !filters.priority.includes(task.priority)) {
+        return false;
+      }
+
+      if (filters.dueDateRange.start || filters.dueDateRange.end) {
+        if (!task.dueDate) {
+          return false;
+        }
+        
+        const taskDate = new Date(task.dueDate);
+        
+        if (isNaN(taskDate.getTime())) {
+          return false;
+        }
+
+        if (filters.dueDateRange.start && taskDate < filters.dueDateRange.start) {
+          return false;
+        }
+        
+        if (filters.dueDateRange.end) {
+          const endDate = new Date(filters.dueDateRange.end);
+          endDate.setHours(23, 59, 59, 999);
+          if (taskDate > endDate) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }).sort((a, b) => {
+      const direction = filters.sortDirection === 'asc' ? 1 : -1;
+      
+      switch (filters.sortBy) {
+        case 'dueDate':
+          if (!a.dueDate && !b.dueDate) return 0;
+          if (!a.dueDate) return 1;
+          if (!b.dueDate) return -1;
+          
+          const dateA = new Date(a.dueDate);
+          const dateB = new Date(b.dueDate);
+          
+          if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
+          if (isNaN(dateA.getTime())) return 1;
+          if (isNaN(dateB.getTime())) return -1;
+          
+          return (dateA.getTime() - dateB.getTime()) * direction;
+        case 'priority':
+          return (this.getPriorityWeight(a.priority) - this.getPriorityWeight(b.priority)) * direction;
+        case 'status':
+          return (this.getStatusWeight(a.status) - this.getStatusWeight(b.status)) * direction;
+        case 'title':
+          return a.title.localeCompare(b.title) * direction;
+        default:
+          return 0;
+      }
+    });
+  }
+
+  private getPriorityWeight(priority: TaskPriority): number {
+    const weights = {
+      [TaskPriority.URGENT]: 4,
+      [TaskPriority.HIGH]: 3,
+      [TaskPriority.MEDIUM]: 2,
+      [TaskPriority.LOW]: 1
+    };
+    return weights[priority] || 0;
+  }
+
+  private getStatusWeight(status: TaskStatus): number {
+    const weights = {
+      [TaskStatus.TODO]: 1,
+      [TaskStatus.IN_PROGRESS]: 2,
+      [TaskStatus.COMPLETED]: 3,
+      [TaskStatus.CANCELLED]: 4
+    };
+    return weights[status] || 0;
+  }
+
+  onFiltersChanged(filters: TaskFilters): void {
+    const filteredTasks = this.filterTasks(this.tasksSubject.value, filters);
+    this.tasks$ = new BehaviorSubject(filteredTasks);
   }
 
   toggleTaskCompletion(task: Task): void {

@@ -1,28 +1,34 @@
 <div class="task-list-container">
-  <div class="header">
-    <h2>My Tasks</h2>
-    <button mat-raised-button color="primary" (click)="openTaskModal()">
-      <mat-icon>add</mat-icon>
-      Add Task
-    </button>
-  </div>
-  <ng-container *ngIf="tasks$ | async as tasks">
-    <div class="tasks-grid" [@taskChanges]="tasks.length">
-      <ng-container *ngIf="tasks.length > 0; else emptyState">
-        <app-task-card *ngFor="let task of tasks" [task]="task" [isPending]="pendingOperations.has(task.id)"
-          (onEdit)="openTaskModal($event)" (onDelete)="deleteTask($event)"
-          (onToggleCompletion)="toggleTaskCompletion($event)">
-        </app-task-card>
-      </ng-container>
-      <ng-template #emptyState>
-        <div class="empty-state">
-          <mat-icon class="empty-state-icon">assignment</mat-icon>
-          <h3>No tasks yet</h3>
-          <p>Click the 'Add Task' button to create your first task</p>
-        </div>
-      </ng-template>
+  <div class="main-content">
+    <div class="header">
+      <h2>My Tasks</h2>
+      <button mat-raised-button color="primary" (click)="openTaskModal()">
+        <mat-icon>add</mat-icon>
+        Add Task
+      </button>
     </div>
-  </ng-container>
-  <mat-spinner *ngIf="isLoading" diameter="40" class="loading-spinner">
-  </mat-spinner>
+    <ng-container *ngIf="tasks$ | async as tasks">
+      <div class="tasks-and-filter">
+        <div class="tasks-grid" [@taskChanges]="tasks.length">
+          <ng-container *ngIf="tasks.length > 0; else emptyState">
+            <app-task-card *ngFor="let task of tasks" [task]="task" [isPending]="pendingOperations.has(task.id)"
+              (onEdit)="openTaskModal($event)" (onDelete)="deleteTask($event)"
+              (onToggleCompletion)="toggleTaskCompletion($event)">
+            </app-task-card>
+          </ng-container>
+          <ng-template #emptyState>
+            <div class="empty-state">
+              <mat-icon class="empty-state-icon">assignment</mat-icon>
+              <h3>No tasks yet</h3>
+              <p>Click the 'Add Task' button to create your first task</p>
+            </div>
+          </ng-template>
+        </div>
+        <app-task-filter [tasks]="tasksSubject.value" (filtersChanged)="onFiltersChanged($event)">
+        </app-task-filter>
+      </div>
+    </ng-container>
+    <mat-spinner *ngIf="isLoading" diameter="40" class="loading-spinner">
+    </mat-spinner>
+  </div>
 </div>
