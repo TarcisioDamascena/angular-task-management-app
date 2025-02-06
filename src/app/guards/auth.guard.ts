@@ -14,7 +14,7 @@ export class AuthGuard {
 
     canActivate(): Observable<boolean | UrlTree> {
         return this.authService.isAuthenticated$.pipe(
-            map(isAuthenticated => isAuthenticated || this.router.createUrlTree(['/login']))
+            map(isValid => isValid || this.router.createUrlTree(['/login']))
         )
     }
 }
