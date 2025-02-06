@@ -58,6 +58,16 @@ import { TaskFilterComponent } from '../task-filter/task-filter.component';
 })
 export class TaskListComponent {
 
+  private originalTasksSubject = new BehaviorSubject<Task[]>([]);
+  private currentFilters: TaskFilters = {
+    search: '',
+    status: [],
+    priority: [],
+    dueDateRange:{ start: null, end: null },
+    sortBy: 'title',
+    sortDirection: 'asc'
+  };
+
   tasksSubject = new BehaviorSubject<Task[]>([]);
   tasks$ = this.tasksSubject.asObservable();
   displayedColumns: string[] = ['title', 'status', 'priority', 'actions'];
@@ -253,8 +263,12 @@ export class TaskListComponent {
   }
 
   onFiltersChanged(filters: TaskFilters): void {
-    const filteredTasks = this.filterTasks(this.tasksSubject.value, filters);
-    this.tasks$ = new BehaviorSubject(filteredTasks);
+    this.currentFilters = filters;
+    this.applyFilters();
+  }
+  applyFilters(): void {
+    const filteredTasks = this.filterTasks(this.originalTasksSubject.value, this.currentFilters);
+    this.tasksSubject.next(filteredTasks);
   }
 
   toggleTaskCompletion(task: Task): void {
@@ -354,7 +368,7 @@ export class TaskListComponent {
     if (status === TaskStatus.COMPLETED) {
       return {
         icon: 'check_circle',
-        color: '#4CAF50', // Material Green
+        color: '#4CAF50',
         message: 'Task completed!'
       };
     }
