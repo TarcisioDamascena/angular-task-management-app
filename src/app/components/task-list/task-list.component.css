@@ -1,6 +1,6 @@
 .task-list-container {
   display: flex;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
   position: relative;
   background-color: #f8f9fa;
   overflow: hidden;
@@ -9,8 +9,14 @@
 .main-content {
   flex: 1;
   padding: 24px;
+}
+
+.tasks-and-filter{
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+  height: calc(100vh - 184px);
   overflow-y: auto;
-  max-height: calc(100vh - 64px);
 }
 
 .header {
@@ -23,12 +29,6 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   width: calc(100% - 48px);
-}
-
-.tasks-and-filter{
-  display: flex;
-  gap: 28px;
-  flex-wrap: wrap;
 }
 
 .header h2 {
@@ -110,7 +110,7 @@ app-task-filter {
   }
 
   .tasks-and-filter {
-    flex-direction: column;
+    height: calc(100vh - 168px);
   }
 }
 
@@ -131,5 +131,9 @@ app-task-filter {
 
   .main-content {
     padding: 12px;
+  }
+
+  .tasks-and-filter {
+    height: calc(100vh - 220px);
   }
 }
