@@ -63,8 +63,8 @@ export class TaskListComponent {
     search: '',
     status: [],
     priority: [],
-    dueDateRange:{ start: null, end: null },
-    sortBy: 'title',
+    dueDateRange: { start: null, end: null },
+    sortBy: 'dueDate',
     sortDirection: 'asc'
   };
 
@@ -89,7 +89,10 @@ export class TaskListComponent {
     this.taskService.getTasks().pipe(
       finalize(() => this.isLoading = false)
     ).subscribe({
-      next: (tasks) => this.tasksSubject.next(tasks),
+      next: (tasks) => {
+        this.originalTasksSubject.next(tasks);
+        this.applyFilters();
+      },
       error: (error) => {
         console.error('Error loading tasks:', error);
         this.snackBar.open('Error loading tasks', 'Close', { duration: 3000 });
@@ -136,12 +139,13 @@ export class TaskListComponent {
       finalize(() => this.pendingOperations.delete(task.id))
     ).subscribe({
       next: (updatedTask) => {
-        const currentTasks = this.tasksSubject.value;
+        const currentTasks = this.originalTasksSubject.value;
         const taskIndex = currentTasks.findIndex(t => t.id === task.id);
         if (taskIndex !== -1) {
           const updatedTasks = [...currentTasks];
           updatedTasks[taskIndex] = updatedTask;
-          this.tasksSubject.next(updatedTasks);
+          this.originalTasksSubject.next(updatedTasks);
+          this.applyFilters();
         }
         this.snackBar.open('Task updated successfully', 'Close', { duration: 3000 });
       },
@@ -153,6 +157,8 @@ export class TaskListComponent {
   }
 
   private createNewTask(taskData: Task): void {
+    console.log('Creating new task with data:', taskData);
+
     const createTaskData: CreateTask = {
       title: taskData.title || '',
       description: taskData.description || 'you did not provide any description for this task!',
@@ -161,10 +167,13 @@ export class TaskListComponent {
       dueDate: taskData.dueDate || new Date().toISOString()
     };
 
+    console.log('Sending to service:', createTaskData);
+    
     this.taskService.createTask(createTaskData).subscribe({
       next: (newTask) => {
-        const currentTasks = this.tasksSubject.value;
-        this.tasksSubject.next([...currentTasks, newTask]);
+        const currentTasks = this.originalTasksSubject.value;
+        this.originalTasksSubject.next([...currentTasks, newTask]);
+        this.applyFilters();
         this.snackBar.open('Task created successfully', 'Close', { duration: 3000 });
       },
       error: (error) => {
@@ -192,9 +201,9 @@ export class TaskListComponent {
         if (!task.dueDate) {
           return false;
         }
-        
+
         const taskDate = new Date(task.dueDate);
-        
+
         if (isNaN(taskDate.getTime())) {
           return false;
         }
@@ -202,7 +211,7 @@ export class TaskListComponent {
         if (filters.dueDateRange.start && taskDate < filters.dueDateRange.start) {
           return false;
         }
-        
+
         if (filters.dueDateRange.end) {
           const endDate = new Date(filters.dueDateRange.end);
           endDate.setHours(23, 59, 59, 999);
@@ -215,20 +224,20 @@ export class TaskListComponent {
       return true;
     }).sort((a, b) => {
       const direction = filters.sortDirection === 'asc' ? 1 : -1;
-      
+
       switch (filters.sortBy) {
         case 'dueDate':
           if (!a.dueDate && !b.dueDate) return 0;
           if (!a.dueDate) return 1;
           if (!b.dueDate) return -1;
-          
+
           const dateA = new Date(a.dueDate);
           const dateB = new Date(b.dueDate);
-          
+
           if (isNaN(dateA.getTime()) && isNaN(dateB.getTime())) return 0;
           if (isNaN(dateA.getTime())) return 1;
           if (isNaN(dateB.getTime())) return -1;
-          
+
           return (dateA.getTime() - dateB.getTime()) * direction;
         case 'priority':
           return (this.getPriorityWeight(a.priority) - this.getPriorityWeight(b.priority)) * direction;
@@ -280,13 +289,15 @@ export class TaskListComponent {
       finalize(() => this.pendingOperations.delete(task.id))
     ).subscribe({
       next: (result) => {
-        const currentTasks = this.tasksSubject.value;
-        const taskIndex = currentTasks.findIndex(t => t.id === task.id);
-        if (taskIndex !== -1) {
-          const updatedTasks = [...currentTasks];
-          updatedTasks[taskIndex] = result;
-          this.tasksSubject.next(updatedTasks);
+        const currentOriginalTasks = this.originalTasksSubject.value;
+        const originalTaskIndex = currentOriginalTasks.findIndex(t => t.id === task.id);
+        if (originalTaskIndex !== -1) {
+          const updatedOriginalTasks = [...currentOriginalTasks];
+          updatedOriginalTasks[originalTaskIndex] = result;
+          this.originalTasksSubject.next(updatedOriginalTasks);
+          this.applyFilters();
         }
+
         const message = newStatus === TaskStatus.COMPLETED ?
           'Task marked as completed' :
           'Task unmarked as completed';
