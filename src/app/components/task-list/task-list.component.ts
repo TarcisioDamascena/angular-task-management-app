@@ -106,8 +106,9 @@ export class TaskListComponent {
       finalize(() => this.pendingOperations.delete(taskId))
     ).subscribe({
       next: () => {
-        const currentTasks = this.tasksSubject.value;
-        this.tasksSubject.next(currentTasks.filter(task => task.id !== taskId));
+        const currentOriginalTasks = this.originalTasksSubject.value;
+        this.originalTasksSubject.next(currentOriginalTasks.filter(task => task.id !== taskId));
+        this.applyFilters();
         this.snackBar.open('Task deleted successfully', 'Close', { duration: 3000 });
       },
       error: (error) => {
@@ -157,8 +158,6 @@ export class TaskListComponent {
   }
 
   private createNewTask(taskData: Task): void {
-    console.log('Creating new task with data:', taskData);
-
     const createTaskData: CreateTask = {
       title: taskData.title || '',
       description: taskData.description || 'you did not provide any description for this task!',
@@ -166,8 +165,6 @@ export class TaskListComponent {
       priority: taskData.priority || TaskPriority.MEDIUM,
       dueDate: taskData.dueDate || new Date().toISOString()
     };
-
-    console.log('Sending to service:', createTaskData);
     
     this.taskService.createTask(createTaskData).subscribe({
       next: (newTask) => {
