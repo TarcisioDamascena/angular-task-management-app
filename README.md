@@ -1,59 +1,52 @@
-# AngularTaskManagementApp
+# Task Management App
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.7.
+Este repositório contém o frontend desenvolvido com Angular 18+ e Angular Material para uma aplicação full stack.
 
-## Development server
+## Tecnologias Utilizadas
 
-To start a local development server, run:
+- Angular 18+
+- Angular Material
+- TypeScript
+- RxJS
+- Angular CLI
 
-```bash
-ng serve
-```
+## Como Executar o Projeto
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Requisitos
+- Node.js instalado
 
-## Code scaffolding
+### Passos para Executar
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/TarcisioDamascena/angular-task-management-app.git
+   cd angular-task-management-app
+   ```
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+2. Instale as dependências do projeto:
+   ```bash
+   npm install
+   ```
 
-```bash
-ng generate component component-name
-```
+3. Inicie o servidor de desenvolvimento:
+   ```bash
+   ng serve
+   ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+4. O frontend estará disponível em:
+   ```
+   http://localhost:4200
+   ```
 
-```bash
-ng generate --help
-```
+## Conexão com a API
+Este frontend consome a API desenvolvida em Java Spring, que pode ser encontrada no seguinte repositório:
+[Link para o repositório do backend](https://github.com/TarcisioDamascena/task-management)
 
-## Building
+## Demonstração 
+### Login/Registro
+![Login-gif](https://github.com/user-attachments/assets/20cfc09b-8b24-4337-94c9-b54a23ecbde7)
 
-To build the project run:
+### Criação, Alteração e Remoção 
+![CreateUpdateDelete](https://github.com/user-attachments/assets/436d7e01-eff9-44b1-91bd-a4330707fd1d)
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Etiquetas de Alerta e Filtragem
+![TaskLabelAndSorting](https://github.com/user-attachments/assets/0a3e3b49-7a68-4eab-aa42-8688df4938ed)
