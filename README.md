@@ -48,5 +48,5 @@ Este frontend consome a API desenvolvida em Java Spring, que pode ser encontrada
 ### Criação, Alteração e Remoção 
 ![CreateUpdateDelete](https://github.com/user-attachments/assets/436d7e01-eff9-44b1-91bd-a4330707fd1d)
 
-### Etiquetas de Alerta e Filtragem
+### Etiquetas de Alerta
 ![TaskLabelAndSorting](https://github.com/user-attachments/assets/0a3e3b49-7a68-4eab-aa42-8688df4938ed)
