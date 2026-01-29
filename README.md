@@ -1,10 +1,10 @@
 # Task Management App
 
-Este repositório contém o frontend desenvolvido com Angular 18+ e Angular Material para uma aplicação full stack.
+Este repositório contém o frontend desenvolvido com Angular 19+ e Angular Material para uma aplicação full stack.
 
 ## Tecnologias Utilizadas
 
-- Angular 18+
+- Angular 19+
 - Angular Material
 - TypeScript
 - RxJS
@@ -13,7 +13,8 @@ Este repositório contém o frontend desenvolvido com Angular 18+ e Angular Mate
 ## Como Executar o Projeto
 
 ### Requisitos
-- Node.js instalado
+- Node.js instalado (recomendado: 18+)
+- Angular CLI (opcional, mas recomendado)
 
 ### Passos para Executar
 1. Clone o repositório:
@@ -37,9 +38,56 @@ Este repositório contém o frontend desenvolvido com Angular 18+ e Angular Mate
    http://localhost:4200
    ```
 
+## Scripts úteis
+
+```bash
+npm run start    # roda o dev server (ng serve)
+npm run build    # build de produção
+npm run test     # executa testes unitários
+npm run serve:ssr:angular-task-management-app # roda SSR (após build)
+```
+
+## Estrutura do projeto
+
+```
+src/
+  app/
+    components/    # componentes de UI (login, register, task-list, etc.)
+    guards/        # proteção de rotas (AuthGuard)
+    models/        # interfaces/modelos de domínio
+    services/      # integração com API e auth
+```
+
 ## Conexão com a API
 Este frontend consome a API desenvolvida em Java Spring, que pode ser encontrada no seguinte repositório:
 [Link para o repositório do backend](https://github.com/TarcisioDamascena/task-management)
+
+### Configuração da API
+Atualmente, os serviços utilizam URLs fixas para a API. Se quiser alterar o endereço, ajuste os valores nos arquivos:
+- `src/app/services/auth.service.ts`
+- `src/app/services/task.service.ts`
+
+> Sugestão: centralizar o `apiUrl` em um arquivo de environment para facilitar a troca entre ambientes.
+
+## SSR (Server-Side Rendering)
+
+Para gerar o build com SSR e executar o servidor:
+
+```bash
+npm run build
+npm run serve:ssr:angular-task-management-app
+```
+
+O servidor SSR ficará disponível em:
+```
+http://localhost:4000
+```
+
+## Testes
+
+```bash
+npm run test
+```
 
 ## Demonstração 
 ### Login/Registro
